@@ -20,3 +20,12 @@ class StudentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
         fields = "__all__"
+
+class SendEmail(serializers.Serializer):
+    text = serializers.CharField()
+    email = serializers.EmailField()
+
+
+
+
+
