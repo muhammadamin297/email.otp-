@@ -1,7 +1,7 @@
 from django.db import models
-from .auth_user import User
+from .auth_user import *
 
-class Departments(models.Model):
+class Departments(BaseModel):
     title = models.CharField(max_length=50)
     is_active = models.BooleanField(default=True)
     descriptions = models.TextField(blank=True,null=True)
@@ -9,14 +9,14 @@ class Departments(models.Model):
     def __str__(self):
         return self.title
 
-class Course(models.Model):
+class Course(BaseModel):
     title = models.CharField()
     descriptions = models.TextField(blank=True,null=True)
 
     def __str__(self):
         return self.title
 
-class Teacher(models.Model):
+class Teacher(BaseModel):
     full_name=models.CharField()
     user=models.OneToOneField(User ,on_delete=models.CASCADE)
     departments = models.ManyToManyField(Departments,related_name='get_departament')

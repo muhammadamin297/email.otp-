@@ -1,7 +1,7 @@
-from .auth_teacher import *
+from .auth_user import *
 from .model_group import *
 
-class Student(models.Model):
+class Student(BaseModel):
     full_name = models.CharField()
     user=models.OneToOneField(User ,on_delete=models.CASCADE)
     group = models.ManyToManyField(GroupStudent,related_name='get_group')
@@ -12,7 +12,7 @@ class Student(models.Model):
     def __str__(self):
         return self.full_name
 
-class Parents(models.Model):
+class Parents(BaseModel):
     student = models.OneToOneField(Student,on_delete=models.CASCADE,related_name='student')
     full_name = models.CharField(max_length=50,null=True,blank=True)
     phone_number = models.CharField(max_length=15,null=True,blank=True)
