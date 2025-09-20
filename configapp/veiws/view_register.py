@@ -24,6 +24,7 @@ class SendEmailAPI(APIView):
         return Response(data={f"{email}":"Yuborildi"})
 
 class VerifyApi(APIView):
+    permission_classes = [IsEmailVerified]
     @swagger_auto_schema(request_body=VerifySerializer)
     def post(self,request):
         serializer = VerifySerializer(data=request.data)
