@@ -1,12 +1,13 @@
 from django.conf import settings
 from django.core.mail import send_mail
+from configapp.models import Departments,Course
 from rest_framework.viewsets import ModelViewSet
 from configapp.models import Teacher
-from configapp.serializers import TeacherSerializer, TeacherAndUserSerializer, UserSerializer, SendEmail
+from configapp.Permission import IsEmailVerified
+from configapp.serializers import TeacherSerializer, TeacherAndUserSerializer, UserSerializer,DepartmentsSerializer,CourseSerializer
 from rest_framework.response import Response
 from rest_framework import status
-from drf_yasg.utils import swagger_auto_schema
-from rest_framework.views import APIView
+
 class TeacherCreateApi(ModelViewSet):
     queryset = Teacher.objects.all()
     serializer_class = TeacherAndUserSerializer
@@ -34,16 +35,10 @@ class TeacherCreateApi(ModelViewSet):
             "teacher": teacher_serializer.data
         }, status=status.HTTP_201_CREATED)
 
+class DepartmentAPI(ModelViewSet):
+    queryset = Departments.objects.all()
+    serializer_class = DepartmentsSerializer
 
-class SendEmailAPI(APIView):
-    @swagger_auto_schema(request_body=SendEmail)
-    def post(self,request):
-        subject = "Salom Djangodan"
-        message = request.data['text']
-        email = request.data['email']
-        email_from = settings.EMAIL_HOST_USER
-        recipient_list = [f"{email}"]
-
-        send_mail(subject,message,email_from,recipient_list)
-        return Response(data={f"{email}":"Yuborildi"})
-
+class CourseAPI(ModelViewSet):
+    queryset = Course.objects.all()
+    serializer_class = CourseSerializer
