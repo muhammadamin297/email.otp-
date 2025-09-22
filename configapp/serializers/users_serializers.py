@@ -1,4 +1,3 @@
-
 from rest_framework import serializers
 from configapp.models import *
 from django.core.cache import cache
@@ -34,20 +33,25 @@ class TeacherSerializer(serializers.ModelSerializer):
         model = Teacher
         fields = "__all__"
         read_only_fields = ['user']
+class ChangePasswordSerializer(serializers.Serializer):
+    new_password = serializers.CharField()
 class TeacherAndUserSerializer(serializers.Serializer):
     user = UserSerializer()
     teacher = TeacherSerializer()
+
 class StudentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
         fields = "__all__"
         read_only_fields = ['user']
+
 class StudentAndUserSerializer(serializers.Serializer):
     user = UserSerializer()
     student = StudentSerializer()
 
 class SendEmail(serializers.Serializer):
     email = serializers.EmailField()
+
 class VerifySerializer(serializers.Serializer):
     email = serializers.EmailField()
     verify_kod =serializers.CharField()
@@ -61,6 +65,27 @@ class CourseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
         fields = "__all__"
+from rest_framework import serializers
 
+class LoginSerializer(serializers.Serializer):
+    id = serializers.IntegerField(required=True)
+    password = serializers.CharField(write_only=True, required=True)
 
+    def validate(self, data):
+        user_id = data.get("id")
+        password = data.get("password")
+
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            raise serializers.ValidationError("Bunday foydalanuvchi mavjud emas.")
+
+        if not user.check_password(password):
+            raise serializers.ValidationError("Parol noto‘g‘ri.")
+
+        if not user.is_active:
+            raise serializers.ValidationError("Foydalanuvchi faol emas.")
+
+        data["user"] = user
+        return data
 

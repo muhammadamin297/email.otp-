@@ -39,11 +39,11 @@ class VerifyApi(APIView):
         recipient_list = [email]
         cache.set(email, password, 600)
         cache.set(f"{email}_password", 600)
-        message = f" Sizning parolingiz: {password}"
-        send_mail(subject, message, email_from, recipient_list)
         if verify_kod == cache_cod:
+            message = f" Sizning parolingiz: {password}"
+            send_mail(subject, message, email_from, recipient_list)
             cache.set(f"{email}_verified", True, 600)
-            cache.set(f"{email}_password", password, 600)
+            cache.set(f"{email}_password", password)
             return Response({
                 'status': True,
                 'detail': 'OTP matched'

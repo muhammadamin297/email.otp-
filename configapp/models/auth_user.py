@@ -21,6 +21,7 @@ class CustomUserManager(BaseUserManager):
     def create_superuser(self, email, password=None, **extra_fields):
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
+        extra_fields.setdefault("is_active", True)
 
         if extra_fields.get("is_staff") is not True:
             raise ValueError("Superuser uchun is_staff=True bo‘lishi shart")
@@ -37,8 +38,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
 
     phone_number = models.CharField(
-        validators=[phone_regex], max_length=13, unique=True
-    )
+        validators=[phone_regex], max_length=13,null=True,blank=True)
     email = models.EmailField(unique=True, null=True, blank=True)
     password = models.CharField()
     is_staff = models.BooleanField(default=False)
