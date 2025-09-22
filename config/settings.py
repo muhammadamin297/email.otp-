@@ -115,11 +115,8 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
-}
+
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -138,15 +135,18 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
 SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {
+        'Basic': {
+            'type': 'basic',
+            'description': 'Basic authentication: username & password kiriting',
+        },
         'Bearer': {
             'type': 'apiKey',
             'in': 'header',
             'name': 'Authorization',
-            'description': 'Token-based authentication. Format: Token <token>',
-        }
+            'description': 'JWT authentication. Format: Bearer <token>',
+        },
     },
     'USE_SESSION_AUTH': False,
 }

@@ -23,8 +23,8 @@ class TableType(BaseModel):
         return self.title
 
 class Table(BaseModel):
-    start_time = models.TimeField()
-    end_time = models.TimeField()
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
     room = models.ForeignKey(Rooms,on_delete=models.RESTRICT)
     type = models.ForeignKey(TableType,on_delete=models.RESTRICT)
     descriptions = models.TextField(blank=True,null=True)

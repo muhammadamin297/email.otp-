@@ -40,8 +40,9 @@ class User(AbstractBaseUser, PermissionsMixin):
         validators=[phone_regex], max_length=13, unique=True
     )
     email = models.EmailField(unique=True, null=True, blank=True)
+    password = models.CharField()
     is_staff = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=False)
     is_student = models.BooleanField(default=False)
     is_teacher = models.BooleanField(default=False)
     objects = CustomUserManager()
