@@ -55,15 +55,15 @@ def change_password(request):
     user.save()
     return Response({"detail":"Password changed successfully"})
 
-class LoginApi(APIView):
-    @swagger_auto_schema(request_body=LoginSerializer)
-    def post(self, request):
-        serializer = LoginSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data["user"]
-
-        return Response({
-            "id": user.id,
-            "email": user.email,
-            "detail": "Login muvaffaqiyatli bajarildi"
-        }, status=status.HTTP_200_OK)
+# class LoginApi(APIView):
+#     @swagger_auto_schema(request_body=LoginSerializer)
+#     def post(self, request):
+#         serializer = LoginSerializer(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+#         user = serializer.validated_data["user"]
+#
+#         return Response({
+#             "id": user.id,
+#             "email": user.email,
+#             "detail": "Login muvaffaqiyatli bajarildi"
+#         }, status=status.HTTP_200_OK)
