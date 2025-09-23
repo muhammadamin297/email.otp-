@@ -23,3 +23,7 @@ class IsEmailVerified(BasePermission):
 
         return cache.get(f"{email}_verified", False)
 
+
+class IsLoggedInUser(BasePermission):
+    def has_permission(self, request, view):
+        return bool(request.user and request.user.is_authenticated)

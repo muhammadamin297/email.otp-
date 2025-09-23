@@ -15,7 +15,8 @@ urlpatterns = [
     path('',include(router.urls)),
     path('send_sms/',SendEmailAPI.as_view()),
     path('verify/',VerifyApi.as_view()),
-    # path("login/", LoginApi.as_view(), name="login"),
+    path("login/", LoginApi.as_view(), name="login"),
     path("change-password/", change_password, name="change-password"),
+    path('login_user_token/',LoginUser.as_view()),
     # path('register/',RegisterApi.as_view()),
 ]

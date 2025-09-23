@@ -89,3 +89,6 @@ class LoginSerializer(serializers.Serializer):
         data["user"] = user
         return data
 
+class LoginSerializers(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField()
