@@ -12,21 +12,8 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['phone_number', 'email','is_active','password', 'is_student', 'is_teacher','is_admin']
+        fields = ['phone_number', 'email', 'is_active', 'password', 'is_student', 'is_teacher', 'is_admin']
         read_only_fields = ['password']
-
-    def create(self, validated_data):
-        email = validated_data.get("email")
-        cached_password = cache.get(f"{email}_password")
-        if validated_data.get("password"):
-            validated_data["password"] = make_password(validated_data["password"])
-        elif cached_password:
-            validated_data["password"] = make_password(cached_password)
-            cache.delete(f"{email}_password")
-        else:
-            default_pass = str(random.randint(1000, 9999))
-            validated_data["password"] = make_password(default_pass)
-        return super().create(validated_data)
 
 class TeacherSerializer(serializers.ModelSerializer):
     class Meta:
@@ -34,7 +21,16 @@ class TeacherSerializer(serializers.ModelSerializer):
         fields = "__all__"
         read_only_fields = ['user']
 class ChangePasswordSerializer(serializers.Serializer):
-    new_password = serializers.CharField()
+    email  = serializers.EmailField()
+    old_password=serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
+    confirm_password = serializers.CharField(required=True)
+    otp = serializers.CharField()
+
+    def validate(self, attrs):
+        if attrs.get("new_password") != attrs.get("confirm_password"):
+            raise serializers.ValidationError("Parollar bir xil emas")
+        return attrs
 class TeacherAndUserSerializer(serializers.Serializer):
     user = UserSerializer()
     teacher = TeacherSerializer()
@@ -70,6 +66,7 @@ from rest_framework import serializers
 class LoginSerializer(serializers.Serializer):
     id = serializers.IntegerField(required=True)
     password = serializers.CharField(write_only=True, required=True)
+    verify_kod = serializers.CharField()
 
     def validate(self, data):
         user_id = data.get("id")

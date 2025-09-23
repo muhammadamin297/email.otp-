@@ -1,16 +1,11 @@
-from django.contrib.auth import authenticate, login
-from django.shortcuts import get_object_or_404
+from django.contrib.auth import authenticate
+from django.core.cache import cache
 from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
 from configapp.make_token import get_tokens_for_user
-from rest_framework.decorators import api_view, permission_classes
 from drf_yasg.utils import swagger_auto_schema
-from configapp.Permission import IsEmailVerified, IsAdmin, IsLoggedInUser
+from configapp.Permission import IsEmailVerified, IsAdmin
 from configapp.models import *
-from configapp.serializers import StudentSerializer, UserSerializer, StudentAndUserSerializer, ChangePasswordSerializer, \
-    LoginSerializer, LoginSerializers
+from configapp.serializers import StudentSerializer, UserSerializer, StudentAndUserSerializer, ChangePasswordSerializer, LoginSerializers
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.viewsets import ModelViewSet
@@ -20,7 +15,7 @@ class StudentDetailApi(ModelViewSet):
     def get_permissions(self):
         if self.action in ["list", "retrieve", "update", "destroy"]:
             return [IsAdmin()]
-        return [IsEmailVerified(), IsAdmin()]
+        return [IsAdmin()]
 
     def get_serializer_class(self):
         if self.action in ["list", "retrieve", "update", "destroy"]:
@@ -31,7 +26,7 @@ class StudentDetailApi(ModelViewSet):
         user_data = request.data.get('user',None)
         user_serializer = UserSerializer(data=user_data)
         if user_serializer.is_valid(raise_exception=True):
-            user = user_serializer.save(is_student=True, must_change_password=True, is_active=False)
+            user = user_serializer.save(is_student=True, is_active=False)
         else:
             return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         student = request.data.get('student',None)
@@ -46,47 +41,52 @@ class StudentDetailApi(ModelViewSet):
             "student": student_serializer.data
         }, status=status.HTTP_201_CREATED)
 
-@swagger_auto_schema(method="post",request_body=ChangePasswordSerializer)
-@api_view(['POST'])
-@permission_classes([IsLoggedInUser])
-def change_password(request):
-    new_password = request.data.get("new_password")
-    if not new_password:
-        return Response({"detail":"Password invalid!"}, status=400)
-    user = request.user
-    user.set_password(new_password)
-    user.is_active = True
-    user.save()
-    return Response({"detail":"Password changed successfully"})
-
-class LoginApi(APIView):
-    @swagger_auto_schema(request_body=LoginSerializer)
+class StudentChangePassword(APIView):
+    permission_classes = [IsAdmin]
+    @swagger_auto_schema(request_body=ChangePasswordSerializer)
     def post(self, request):
-        serializer = LoginSerializer(data=request.data)
+        serializer = ChangePasswordSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data["user"]
+        email = serializer.validated_data.get("email")
+        otp = serializer.validated_data.get("otp")
+        new_password = serializer.validated_data.get("new_password")
+        cached_otp = cache.get(f"{email}_otp")
+        if not cached_otp or cached_otp != otp:
+            return Response(
+                {"message": "OTP noto'g'ri yoki muddati tugagan"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response(
+                {"message": "Foydalanuvchi topilmadi"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        user.set_password(new_password)
+        user.is_active = True
+        user.save()
+        cache.delete(f"{email}_otp")
+        return Response(
+            {"message": "Parol muvaffaqiyatli o'zgartirildi"},
+            status=status.HTTP_200_OK
+        )
 
-        return Response({
-            "id": user.id,
-            "email": user.email,
-            "detail": "Login muvaffaqiyatli bajarildi"
-        }, status=status.HTTP_200_OK)
 
 class LoginUser(APIView):
     @swagger_auto_schema(request_body=LoginSerializers)
     def post(self, request):
         serializer = LoginSerializers(data=request.data)
         serializer.is_valid(raise_exception=True)
+
         email = serializer.validated_data.get('email')
         password = serializer.validated_data.get('password')
-        user = get_object_or_404(User, email=email)
-        if not user.check_password(password):
-            return Response({"error": "Password yoki email noto'g'ri"}, status=status.HTTP_401_UNAUTHORIZED)
-        user.is_active = True
-        user.save()
-        if user.is_active:
-            token = get_tokens_for_user(user)
-            return Response(data=token)
-        else:
-            return Response({"error":"User active emas"})
+        user = authenticate(request, email=email, password=password)
+        if not user:
+            return Response({"error": "Email yoki parol noto'g'ri"}, status=400)
+        if not user.is_active:
+            return Response({"error": "User active emas"}, status=403)
+        token = get_tokens_for_user(user)
+        return Response(token, status=200)
+
 
