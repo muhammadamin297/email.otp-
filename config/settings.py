@@ -170,11 +170,12 @@ AUTH_USER_MODEL = 'configapp.User'
 STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+# (ixtiyoriy) konfiguratsiya
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'adhambekbaylanov@gmail.com'
-EMAIL_HOST_PASSWORD = 'aeyj eknp kbka ihjl'
-
+EMAIL_HOST_USER = 'muhammadaminkabilov820@gmail.com'
+EMAIL_HOST_PASSWORD = 'itse vvxg nehy bmab'  # Gmail app password
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
